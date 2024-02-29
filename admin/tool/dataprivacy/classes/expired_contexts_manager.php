@@ -735,7 +735,8 @@ class expired_contexts_manager {
         $expiredroleusers = [];
         if (!empty($expiredroles)) {
             // Find the list of expired role users.
-            $expiredroleuserassignments = get_role_users($expiredroles, $context, true, 'ra.id, u.id AS userid', 'ra.id');
+            $expiredroleuserassignments = get_role_users($expiredroles, $context, true, 'ra.id, u.id AS userid',
+                'ra.id', true, '', '', '', 'u.id = :userid', [ 'userid' => $context->instanceid]);
             $expiredroleusers = array_map(function($assignment) {
                 return $assignment->userid;
             }, $expiredroleuserassignments);
@@ -746,7 +747,8 @@ class expired_contexts_manager {
         $unexpiredroleusers = [];
         if (!empty($unexpiredroles)) {
             // Find the list of unexpired role users.
-            $unexpiredroleuserassignments = get_role_users($unexpiredroles, $context, true, 'ra.id, u.id AS userid', 'ra.id');
+            $unexpiredroleuserassignments = get_role_users($unexpiredroles, $context, true, 'ra.id, u.id AS userid',
+                'ra.id', true, '', '', '', 'u.id = :userid', [ 'userid' => $context->instanceid]);
             $unexpiredroleusers = array_map(function($assignment) {
                 return $assignment->userid;
             }, $unexpiredroleuserassignments);
