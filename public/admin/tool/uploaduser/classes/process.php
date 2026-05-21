@@ -629,10 +629,22 @@ class process {
             return;
         }
 
+        // If existing username found from the email is not equal to username from csv it will trigger rename.
         $matchonemailallowrename = $this->get_match_on_email() && $this->get_allow_renames();
-        if ($matchonemailallowrename && $user->username && ($user->username !== $existinguser->username)) {
+        if (
+            $matchonemailallowrename && is_object($user) && is_object($existinguser)
+                && property_exists($user, 'username') && property_exists($existinguser, 'username')
+                && ($user->username !== $existinguser->username)
+        ) {
             $user->oldusername = $existinguser->username;
             $existinguser = false;
+        }
+
+        // We also need to check if username exists somewhere else not just under the mail from the file.
+        if ($matchonemailallowrename && $user->username) {
+            $userselect = 'username = :username';
+            $userparams = ['username' => $user->username];
+            $existinguserusernamecount = count($DB->get_records_select('user', "{$userselect}", $userparams));
         }
 
         // Renaming requested?
@@ -643,7 +655,7 @@ class process {
                 return;
             }
 
-            if ($existinguser) {
+            if ($existinguser || $existinguserusernamecount) {
                 $this->upt->track('status', get_string('usernotrenamedexists', 'error'), 'error');
                 $this->renameerrors++;
                 return;
